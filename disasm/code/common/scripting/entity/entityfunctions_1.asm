@@ -177,9 +177,9 @@ DeclareNewEntity:
             if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
                 clr.w   ENTITYDEF_OFFSET_XVELOCITY(a0)
             else
-                clr.l   ENTITYDEF_OFFSET_XVELOCITY(a0)
+                clr.l   ENTITYDEF_OFFSET_XVELOCITY(a0) ; clear both X and Y velocity words
             endif
-                clr.l   ENTITYDEF_OFFSET_XTRAVEL(a0)
+                clr.l   ENTITYDEF_OFFSET_XTRAVEL(a0) ; clear both X and Y travel words
                 move.w  d1,ENTITYDEF_OFFSET_XDEST(a0)
                 move.w  d2,ENTITYDEF_OFFSET_YDEST(a0)
                 move.b  d3,ENTITYDEF_OFFSET_FACING(a0)
@@ -384,8 +384,11 @@ PositionBattleEntities:
                 moveq   #3,d3
                 move.l  #eas_Standing,d5
                 bsr.w   GetCombatantMapsprite
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
-                cmpi.w  #MAPSPRITES_SPECIALS_START,d4
+            if (STANDARD_BUILD=1)
+                move.w  d1,-(sp)        ; EXPANDED_MAPSPRITES
+                move.w  d4,d1
+                jsr     IsSpecialSprite ; Out: CCR carry-bit clear if true
+                movem.w (sp)+,d1        ; MOVEM to pull value back from the stack without affecting the CCR
             else
                 cmpi.b  #MAPSPRITES_SPECIALS_START,d4
             endif
@@ -421,7 +424,11 @@ PositionBattleEntities:
                 bne.w   @Done
                 
                 ; Position neutral entities
-                lea     ((ENTITY_EVENT_ENEMY_END-$1000000)).w,a1
+            if (STANDARD_BUILD=1)
+                lea     ((ENTITY_EVENT_ENEMY_END-$1000000)).w,a1 ; neutral entities occupy enemy combatant slots to accommodate expanded force members
+            else
+                lea     ((ENTITY_EVENT_ENEMY_START-$1000000)).w,a1
+            endif
                 lea     table_NeutralBattleEntities(pc), a0
                 clr.w   d1
                 getSavedByte CURRENT_BATTLE, d1
@@ -433,8 +440,8 @@ PositionBattleEntities:
                 beq.s   @Continue
 @loc_13:
                 
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
-                adda.w  #BATTLE_NEUTRAL_ENTITY_SIZE,a0
+            if (STANDARD_BUILD=1)
+                adda.w  #BATTLE_NEUTRAL_ENTITY_SIZE,a0 ; EXPANDED_MAPSPRITES
                 cmpi.w  #-1,(a0)
                 bne.s   @loc_13
                 cmp.w   (a0)+,d1
@@ -473,9 +480,8 @@ PositionBattleEntities:
                 muls.w  #MAP_TILE_SIZE,d1
                 andi.w  #$3F,d2 
                 muls.w  #MAP_TILE_SIZE,d2
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
-                move.w  (a0)+,d3
-                clr.w   d4
+            if (STANDARD_BUILD=1)
+                move.w  (a0)+,d3 ; EXPANDED_MAPSPRITES
                 move.w  (a0)+,d4
             else
                 move.b  (a0)+,d3

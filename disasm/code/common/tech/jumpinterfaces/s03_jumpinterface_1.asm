@@ -15,41 +15,41 @@ j_ExecuteDiamondMenu:
 ; =============== S U B R O U T I N E =======================================
 
 
-j_ExecuteItemMenu:
+j_ExecuteBattlefieldItemMenu:
                 
-                jmp     ExecuteItemMenu(pc)
+                jmp     ExecuteBattlefieldItemMenu(pc)
 
-    ; End of function j_ExecuteItemMenu
+    ; End of function j_ExecuteBattlefieldItemMenu
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_ExecuteItemMenu_0:
+j_ExecuteBattlefieldItemMenu_0:
                 
-                jmp     ExecuteItemMenu(pc)
+                jmp     ExecuteBattlefieldItemMenu(pc)
 
-    ; End of function j_ExecuteItemMenu_0
+    ; End of function j_ExecuteBattlefieldItemMenu_0
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_ExecuteItemMenu_1:
+j_ExecuteBattlefieldItemMenu_1:
                 
-                jmp     ExecuteItemMenu(pc)
+                jmp     ExecuteBattlefieldItemMenu(pc)
 
-    ; End of function j_ExecuteItemMenu_1
+    ; End of function j_ExecuteBattlefieldItemMenu_1
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_ExecuteMagicMenu:
+j_ExecuteBattlefieldMagicMenu:
                 
-                jmp     ExecuteMagicMenu(pc)
+                jmp     ExecuteBattlefieldMagicMenu(pc)
 
-    ; End of function j_ExecuteMagicMenu
+    ; End of function j_ExecuteBattlefieldMagicMenu
 
 
 ; =============== S U B R O U T I N E =======================================
@@ -65,61 +65,61 @@ j_OpenBattlefieldMiniStatusWindow:
 ; =============== S U B R O U T I N E =======================================
 
 
-j_CloseMiniStatusWindow:
+j_CloseBattlefieldMiniStatusWindow:
                 
-                jmp     CloseMiniStatusWindow(pc)
+                jmp     CloseBattlefieldMiniStatusWindow(pc)
 
-    ; End of function j_CloseMiniStatusWindow
+    ; End of function j_CloseBattlefieldMiniStatusWindow
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_OpenBattlesceneMiniStatusWindows:
+j_CreateBattlesceneMiniStatusWindows:
                 
-                jmp     OpenBattlesceneMiniStatusWindows(pc)
+                jmp     CreateBattlesceneMiniStatusWindows(pc)
 
-    ; End of function j_OpenBattlesceneMiniStatusWindows
+    ; End of function j_CreateBattlesceneMiniStatusWindows
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_ShowAllyBattlesceneWindow:
+j_OpenAllyBattlesceneMiniStatusWindow:
                 
-                jmp     ShowAllyBattlesceneWindow(pc)
+                jmp     OpenAllyBattlesceneMiniStatusWindow(pc)
 
-    ; End of function j_ShowAllyBattlesceneWindow
+    ; End of function j_OpenAllyBattlesceneMiniStatusWindow
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_ShowEnemyBattlesceneWindow:
+j_OpenEnemyBattlesceneMiniStatusWindow:
                 
-                jmp     ShowEnemyBattlesceneWindow(pc)
+                jmp     OpenEnemyBattlesceneMiniStatusWindow(pc)
 
-    ; End of function j_ShowEnemyBattlesceneWindow
+    ; End of function j_OpenEnemyBattlesceneMiniStatusWindow
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_HideAllyBattlesceneWindow:
+j_CloseAllyBattlesceneMiniStatusWindow:
                 
-                jmp     HideAllyBattlesceneWindow(pc)
+                jmp     CloseAllyBattlesceneMiniStatusWindow(pc)
 
-    ; End of function j_HideAllyBattlesceneWindow
+    ; End of function j_CloseAllyBattlesceneMiniStatusWindow
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_HideEnemyBattlesceneWindow:
+j_CloseEnemyBattlesceneMiniStatusWindow:
                 
-                jmp     HideEnemyBattlesceneWindow(pc)
+                jmp     CloseEnemyBattlesceneMiniStatusWindow(pc)
 
-    ; End of function j_HideEnemyBattlesceneWindow
+    ; End of function j_CloseEnemyBattlesceneMiniStatusWindow
 
 
 ; =============== S U B R O U T I N E =======================================
@@ -165,41 +165,41 @@ j_ClosePortraitWindow:
 ; =============== S U B R O U T I N E =======================================
 
 
-j_InitializeMembersListScreen:
+j_ExecuteMembersListScreenOnMainSummaryPage:
                 
-                jmp     InitializeMembersListScreen(pc)
+                jmp     ExecuteMembersListScreenOnMainSummaryPage(pc)
 
-    ; End of function j_InitializeMembersListScreen
+    ; End of function j_ExecuteMembersListScreenOnMainSummaryPage
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_BuildMembersListScreen_NewAttAndDefPage:
+j_ExecuteMembersListScreenOnItemSummaryPage:
                 
-                jmp     BuildMembersListScreen_NewAttAndDefPage(pc)
+                jmp     ExecuteMembersListScreenOnItemSummaryPage(pc)
 
-    ; End of function j_BuildMembersListScreen_NewAttAndDefPage
+    ; End of function j_ExecuteMembersListScreenOnItemSummaryPage
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_BuildMembersListScreen_MagicPage:
+j_ExecuteMembersListScreenOnMagicSummaryPage:
                 
-                jmp     BuildMembersListScreen_MagicPage(pc)
+                jmp     ExecuteMembersListScreenOnMagicSummaryPage(pc)
 
-    ; End of function j_BuildMembersListScreen_MagicPage
+    ; End of function j_ExecuteMembersListScreenOnMagicSummaryPage
 
 
 ; =============== S U B R O U T I N E =======================================
 
 
-j_BuildShopInventoryScreen:
+j_ExecuteShopScreen:
                 
-                jmp     BuildShopInventoryScreen(pc)
+                jmp     ExecuteShopScreen(pc)
 
-    ; End of function j_BuildShopInventoryScreen
+    ; End of function j_ExecuteShopScreen
 
 
 ; =============== S U B R O U T I N E =======================================

@@ -26,10 +26,10 @@ InitializeBattlescene:
                 subi.l  #BATTLESCENE_BACKGROUND_MODIFICATION_POINTER,d2
                 lsr.l   #2,d2
                 subq.w  #1,d2
-@InitializeBattlesceneData_Loop:
+@ClearBattlesceneData_Loop:
                 
                 clr.l   (a0)+
-                dbf     d2,@InitializeBattlesceneData_Loop
+                dbf     d2,@ClearBattlesceneData_Loop
                 
                 move.w  d1,-(sp)
                 move.w  d0,((BATTLESCENE_ENEMY-$1000000)).w
@@ -257,7 +257,7 @@ InitializeBattlescene:
                 trap    #VINT_FUNCTIONS
                 dc.w VINTS_ADD
                 dc.l VInt_UpdateBattlesceneGraphics
-                jsr     j_OpenBattlesceneMiniStatusWindows
+                jsr     j_CreateBattlesceneMiniStatusWindows
                 trap    #VINT_FUNCTIONS
                 dc.w VINTS_ADD
                 dc.l VInt_UpdateWindows
@@ -268,21 +268,21 @@ InitializeBattlescene:
                 cmpi.w  #-1,d0
                 beq.s   @CheckAllyBattlesceneWindow
                 clr.w   d1
-                jsr     j_ShowEnemyBattlesceneWindow
+                jsr     j_OpenEnemyBattlesceneMiniStatusWindow
 @CheckAllyBattlesceneWindow:
                 
                 move.w  ((BATTLESCENE_ALLY-$1000000)).w,d0
                 cmpi.w  #-1,d0
                 beq.w   @StartFadeInAndPlayMusic
                 clr.w   d1
-                jsr     j_ShowAllyBattlesceneWindow
+                jsr     j_OpenAllyBattlesceneMiniStatusWindow
                 
                 move.w  #22,d0
                 clr.w   d1
                 movem.w d0-d1,-(sp)
-                bsr.w   sub_193B2
+                bsr.w   LoadBattlesceneAllyAndWeaponVdpSprites
                 movem.w (sp)+,d0-d1
-                bsr.w   sub_19504
+                bsr.w   LoadBattlesceneGroundVdpSprites
 @StartFadeInAndPlayMusic:
                 
                 jsr     (WaitForVInt).w
@@ -673,13 +673,12 @@ bsc02_moveEnemyBattlesprite:
 
 ; =============== S U B R O U T I N E =======================================
 
-; related to battlescene ally
-
 
 bsc05_makeAllyIdle:
                 
                 btst    #4,((byte_FFB56F-$1000000)).w
                 bne.w   loc_1A418
+                
                 cmpi.w  #-1,((BATTLESCENE_ALLY-$1000000)).w
                 beq.w   return_18698
                 
@@ -846,7 +845,7 @@ loc_18754:
                 bsr.w   sub_19952
 loc_18758:
                 
-                jsr     j_HideAllyBattlesceneWindow
+                jsr     j_CloseAllyBattlesceneMiniStatusWindow
                 move.w  d7,((BATTLESCENE_ALLY-$1000000)).w
                 move.w  d7,d0
                 bsr.w   GetBattlespriteAndPalette
@@ -945,14 +944,14 @@ loc_1888C:
                 bsr.w   sub_1892A
                 move.w  (sp)+,d0
                 clr.w   d1
-                bsr.w   sub_193B2
+                bsr.w   LoadBattlesceneAllyAndWeaponVdpSprites
                 move.w  (sp)+,d0
                 clr.w   d1
-                bsr.w   sub_19504
+                bsr.w   LoadBattlesceneGroundVdpSprites
                 move.w  ((BATTLESCENE_ALLY-$1000000)).w,d0
                 move.b  ((byte_FFB56F-$1000000)).w,d1
                 andi.w  #2,d1
-                jsr     j_ShowAllyBattlesceneWindow
+                jsr     j_OpenAllyBattlesceneMiniStatusWindow
                 bsr.w   ApplyStatusEffectsToAllyAnimation
                 jsr     (sub_1942).w    
                 move.w  (sp)+,d1
@@ -1097,7 +1096,7 @@ loc_189AE:
                 lea     (FF2000_LOADING_SPACE).l,a1
                 bsr.w   LoadBattlesceneBackground
                 move.w  ((BATTLESCENE_ENEMY-$1000000)).w,d0
-                jsr     j_HideEnemyBattlesceneWindow
+                jsr     j_CloseEnemyBattlesceneMiniStatusWindow
                 bsr.w   LoadBattlesceneBackgroundLayout
                 move.w  (sp)+,d0
                 
@@ -1262,7 +1261,7 @@ loc_18B30:
                 
                 move.b  ((byte_FFB56F-$1000000)).w,d1
                 andi.w  #4,d1
-                jsr     j_ShowEnemyBattlesceneWindow
+                jsr     j_OpenEnemyBattlesceneMiniStatusWindow
                 move.w  ((BATTLESCENE_ENEMYBATTLESPRITE-$1000000)).w,d0
                 bsr.w   GetEnemyBattlespriteIdleAnimate
                 lea     ($5C00).w,a1
@@ -1562,7 +1561,7 @@ loc_18DFC:
                 move.w  ((BATTLESCENE_ALLY-$1000000)).w,d0
                 move.b  ((byte_FFB56F-$1000000)).w,d1
                 andi.w  #2,d1
-                jsr     j_ShowAllyBattlesceneWindow
+                jsr     j_OpenAllyBattlesceneMiniStatusWindow
                 move.w  (sp)+,d1
                 move.w  (a6)+,d0
                 subq.w  #1,d0
@@ -1610,9 +1609,9 @@ loc_18E6E:
                 bsr.w   MoveEnemyBattlespriteVertically
                 move.w  (sp)+,d0
                 movem.w d0-d1,-(sp)
-                bsr.w   sub_193B2
+                bsr.w   LoadBattlesceneAllyAndWeaponVdpSprites
                 movem.w (sp)+,d0-d1
-                bsr.w   sub_19504
+                bsr.w   LoadBattlesceneGroundVdpSprites
                 jsr     (sub_1942).w    
                 jsr     (WaitForVInt).w
                 movem.w (sp)+,d0/d4-d5
@@ -1718,7 +1717,7 @@ loc_18F92:
                 move.w  ((BATTLESCENE_ENEMY-$1000000)).w,d0
                 move.b  ((byte_FFB56F-$1000000)).w,d1
                 andi.w  #4,d1
-                jsr     j_ShowEnemyBattlesceneWindow
+                jsr     j_OpenEnemyBattlesceneMiniStatusWindow
                 move.w  (sp)+,d1
                 move.w  (a6)+,d0
                 subq.w  #1,d0
@@ -1878,7 +1877,7 @@ loc_1910C:
                 bcs.w   return_191DE
                 jsr     j_SetCurrentExp
                 jsr     j_LevelUp
-                clr.w   (SPEECH_SFX).l
+                clr.w   (CURRENT_SPEECH_SFX).l
                 lea     (LEVELUP_ARGUMENTS).l,a5
                 move.w  ((BATTLESCENE_ALLY-$1000000)).w,((DIALOGUE_NAME_INDEX_1-$1000000)).w
                 moveq   #0,d0
@@ -1890,7 +1889,7 @@ loc_1910C:
                 move.w  ((BATTLESCENE_ALLY-$1000000)).w,d0
                 move.b  ((byte_FFB56F-$1000000)).w,d1
                 andi.w  #2,d1
-                jsr     j_ShowAllyBattlesceneWindow
+                jsr     j_OpenAllyBattlesceneMiniStatusWindow
                 sndCom  SFX_LEVEL_UP
                 txt     244             ; "{NAME} became{N}level {#}!"
                 moveq   #0,d0
@@ -1968,7 +1967,7 @@ bsc10_displayMessage:
                 move.w  (a6)+,((DIALOGUE_NAME_INDEX_1-$1000000)).w
                 move.w  (a6)+,((DIALOGUE_NAME_INDEX_2-$1000000)).w
                 move.l  (a6)+,((DIALOGUE_NUMBER-$1000000)).w
-                clr.w   (SPEECH_SFX).l
+                clr.w   (CURRENT_SPEECH_SFX).l
                 checkSavedByte #0, NO_BATTLE_MESSAGES_TOGGLE
                 bne.s   loc_1920C
                 jsr     (DisplayText).l 
@@ -2008,7 +2007,7 @@ bsc11_displayMessageWithNoWait:
                 move.w  (a6)+,((DIALOGUE_NAME_INDEX_1-$1000000)).w
                 move.w  (a6)+,((DIALOGUE_NAME_INDEX_2-$1000000)).w
                 move.l  (a6)+,((DIALOGUE_NUMBER-$1000000)).w
-                clr.w   (SPEECH_SFX).l
+                clr.w   (CURRENT_SPEECH_SFX).l
                 jmp     (DisplayText).l 
 
     ; End of function bsc11_displayMessageWithNoWait
@@ -2029,38 +2028,40 @@ bsc12_closeTextBox:
 
 EndBattlescene:
                 
+                module
                 clr.w   d0
                 getSavedByte MESSAGE_SPEED, d0
                 moveq   #7,d1
                 sub.w   d0,d1
                 clr.w   d0
                 bset    d1,d0
-loc_19258:
+@WaitForInput:
                 
                 tst.b   ((PLAYER_1_INPUT-$1000000)).w
                 bne.s   byte_19266
                 jsr     (WaitForVInt).w
-                dbf     d0,loc_19258
+                dbf     d0,@WaitForInput
 byte_19266:
                 
                 sndCom  SOUND_COMMAND_FADE_OUT
                 move.w  ((BATTLESCENE_ALLY-$1000000)).w,d0
                 cmpi.w  #-1,d0
-                beq.s   loc_1927A
-                jsr     j_HideAllyBattlesceneWindow
-loc_1927A:
+                beq.s   @Enemy
+                jsr     j_CloseAllyBattlesceneMiniStatusWindow
+@Enemy:
                 
                 move.w  ((BATTLESCENE_ENEMY-$1000000)).w,d0
                 cmpi.w  #-1,d0
                 beq.s   @Return
                 
-                jsr     j_HideEnemyBattlesceneWindow
+                jsr     j_CloseEnemyBattlesceneMiniStatusWindow
 @Return:
                 
                 rts
 
     ; End of function EndBattlescene
 
+                modend
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -2201,7 +2202,7 @@ loc_19378:
                 move.w  d1,d0
                 asr.w   #BYTE_SHIFT_COUNT,d0
                 ext.w   d1
-                bsr.s   sub_193C4
+                bsr.s   LoadBattlesceneAllyVdpSprites
                 move.w  (sp)+,d1
                 bsr.w   sub_19546
                 jmp     (sub_1942).w    
@@ -2235,7 +2236,7 @@ sub_1939E:
                 move.w  d1,d0
                 asr.w   #BYTE_SHIFT_COUNT,d0
                 ext.w   d1
-                bsr.s   sub_193C4
+                bsr.s   LoadBattlesceneAllyVdpSprites
                 move.w  (sp)+,d1
                 bsr.w   sub_1955E
                 jmp     (sub_1942).w    
@@ -2248,15 +2249,15 @@ sub_1939E:
 ; related to battlescene ally and weapon VDP sprites
 
 
-sub_193B2:
+LoadBattlesceneAllyAndWeaponVdpSprites:
                 
                 movem.w d0-d1,-(sp)
-                bsr.s   sub_193C4
+                bsr.s   LoadBattlesceneAllyVdpSprites
                 movem.w (sp)+,d0-d1
-                bsr.w   sub_19564
+                bsr.w   LoadBattlesceneWeaponVdpSprites
                 jmp     (sub_1942).w    
 
-    ; End of function sub_193B2
+    ; End of function LoadBattlesceneAllyAndWeaponVdpSprites
 
 
 ; =============== S U B R O U T I N E =======================================
@@ -2264,7 +2265,7 @@ sub_193B2:
 ; related to battlescene ally VDP sprites
 
 
-sub_193C4:
+LoadBattlesceneAllyVdpSprites:
                 
                 cmpi.w  #-1,((BATTLESCENE_ALLY-$1000000)).w
                 beq.s   @Return
@@ -2274,7 +2275,7 @@ sub_193C4:
                 beq.s   @loc_1
                 
                 ; Mirrored ally
-                lea     $48(a0),a0
+                lea     72(a0),a0
                 subi.w  #112,d0
 @loc_1:
                 
@@ -2301,9 +2302,9 @@ sub_193C4:
                 add.w   d0,(a1)+
                 dbf     d7,@loc_4
                 
-                addi.w  #$108,d0
+                addi.w  #264,d0
                 move.w  d0,((BATTLESCENE_ALLY_X-$1000000)).w
-                addi.w  #$C0,d1 
+                addi.w  #192,d1
                 move.w  d1,((BATTLESCENE_ALLY_Y-$1000000)).w
                 lea     (BATTLESCENE_BATTLESPRITE_TOGGLE).l,a0
                 move.l  #$1010101,d0
@@ -2314,7 +2315,7 @@ sub_193C4:
                 
                 rts
 
-    ; End of function sub_193C4
+    ; End of function LoadBattlesceneAllyVdpSprites
 
 
 ; =============== S U B R O U T I N E =======================================
@@ -2462,7 +2463,7 @@ sub_194FE:
 ; related to battlescene ground VDP sprites
 
 
-sub_19504:
+LoadBattlesceneGroundVdpSprites:
                 
                 cmpi.b  #-1,((BATTLESCENE_BACKGROUND-$1000000)).w
                 beq.s   @Return
@@ -2492,7 +2493,7 @@ sub_19504:
                 
                 rts
 
-    ; End of function sub_19504
+    ; End of function LoadBattlesceneGroundVdpSprites
 
 
 ; =============== S U B R O U T I N E =======================================
@@ -2531,7 +2532,7 @@ sub_1955E:
 ; related to battlescene weapon VDP sprites
 
 
-sub_19564:
+LoadBattlesceneWeaponVdpSprites:
                 
                 btst    #0,((byte_FFB56E-$1000000)).w
                 bne.s   loc_1957E
@@ -2585,7 +2586,7 @@ return_195E0:
                 
                 rts
 
-    ; End of function sub_19564
+    ; End of function LoadBattlesceneWeaponVdpSprites
 
 
 ; =============== S U B R O U T I N E =======================================

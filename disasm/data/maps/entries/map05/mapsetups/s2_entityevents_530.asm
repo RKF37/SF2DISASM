@@ -2,8 +2,8 @@
 ; ASM FILE data\maps\entries\map05\mapsetups\s2_entityevents_530.asm :
 ; 0x6043A..0x604C8 : 
 ms_map5_flag530_EntityEvents:
-                msEntityEvent 28, DOWN, Map5_212_EntityEvent0-ms_map5_flag530_EntityEvents
-                msEntityEvent 27, UP, Map5_212_EntityEvent1-ms_map5_flag530_EntityEvents
+                msEntityEvent ALLY_LEMON, DOWN, Map5_212_EntityEvent0-ms_map5_flag530_EntityEvents
+                msEntityEvent ALLY_CHAZ, UP, Map5_212_EntityEvent1-ms_map5_flag530_EntityEvents
                 msEntityEvent 128, DOWN, Map5_212_EntityEvent2-ms_map5_flag530_EntityEvents
                 msEntityEvent 129, DOWN, Map5_212_EntityEvent3-ms_map5_flag530_EntityEvents
                 msEntityEvent 130, RIGHT, Map5_212_EntityEvent4-ms_map5_flag530_EntityEvents
@@ -64,8 +64,8 @@ Map5_212_EntityEvent4:
                  
                 chkFlg  28              ; Lemon joined
                 beq.s   byte_60494      
-                move.w  ((SPEECH_SFX-$1000000)).w,((SPEECH_SFX_BACKUP-$1000000)).w
-                clr.w   ((SPEECH_SFX-$1000000)).w
+                move.w  ((CURRENT_SPEECH_SFX-$1000000)).w,((SPEECH_SFX_COPY-$1000000)).w
+                clr.w   ((CURRENT_SPEECH_SFX-$1000000)).w
                 clr.w   ((DIALOGUE_NAME_INDEX_1-$1000000)).w
                 txt     423             ; "{NAME} investigated{N}the area.{W2}{CLEAR}"
                 txt     4082            ; "A hole.{W1}"
@@ -75,11 +75,11 @@ byte_60494:
                 chkFlg  945             ; Set after recruiting Lemon in Yeel
                 bne.s   Map5_212_DefaultEntityEvent
                 script  cs_6060E
-                move.w  ((SPEECH_SFX-$1000000)).w,((SPEECH_SFX_BACKUP-$1000000)).w
+                move.w  ((CURRENT_SPEECH_SFX-$1000000)).w,((SPEECH_SFX_COPY-$1000000)).w
                 move.w  #ALLY_LEMON,d0
                 jsr     GetEntityPortaitAndSpeechSfx
                 move.w  d1,((CURRENT_PORTRAIT-$1000000)).w
-                move.w  d2,((SPEECH_SFX-$1000000)).w
+                move.w  d2,((CURRENT_SPEECH_SFX-$1000000)).w
                 jsr     LoadAndDisplayCurrentPortrait
                 txt     3483            ; "I can't believe it!{N}I want to die, but I can't!{W1}"
                 setFlg  945             ; Set after recruiting Lemon in Yeel

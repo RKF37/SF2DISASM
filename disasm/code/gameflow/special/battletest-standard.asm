@@ -74,7 +74,7 @@ StartBattleTest:
                 
 @DebugSetFlags: movem.w d0-d4,-(sp)
                 move.w  #70,d0 
-                jsr     DebugFlagSetter
+                jsr     DebugSetFlag
                 movem.w (sp)+,d0-d4
                 
                 clr.w   d1
@@ -121,7 +121,7 @@ StartBattleTest:
             if (TEST_BUILD=1)
                 rts
             else
-                jsr     InitializeMembersListScreen
+                jsr     ExecuteMembersListScreenOnMainSummaryPage
                 tst.b   d0
                 bne.w   @Start
                 

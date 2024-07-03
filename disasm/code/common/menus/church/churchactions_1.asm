@@ -151,8 +151,12 @@ ChurchMenu:
                 movem.l a0,-(sp)
                 move.w  d0,member(a6)
                 jsr     j_GetCombatantEntryAddress
+            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
+                getSavedWord (a0), d2, COMBATANT_OFFSET_STATUSEFFECTS
+            else
                 lea     COMBATANT_OFFSET_STATUSEFFECTS(a0),a0
                 move.w  (a0),d2
+            endif
                 move.w  d2,d3
                 andi.w  #STATUSEFFECT_POISON,d3
                 beq.w   @CureNextPoisonedMember
@@ -227,8 +231,12 @@ ChurchMenu:
                 movem.l a0,-(sp)
                 move.w  d0,member(a6)
                 jsr     j_GetCombatantEntryAddress
+            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
+                getSavedWord (a0), d2, COMBATANT_OFFSET_STATUSEFFECTS
+            else
                 lea     COMBATANT_OFFSET_STATUSEFFECTS(a0),a0
                 move.w  (a0),d2
+            endif
                 andi.w  #STATUSEFFECT_CURSE,d2
                 beq.w   @CureNextCursedMember
                 addi.w  #1,cursedMembersCount(a6)
@@ -309,8 +317,8 @@ ChurchMenu:
                 ; @StartPromo
                 txt     136             ; "{CLEAR}Who do you want to{N}promote?{W2}"
                 clsTxt
-                move.b  #0,((byte_FFB13C-$1000000)).w
-                jsr     j_InitializeMembersListScreen
+                move.b  #ITEM_SUBMENU_ACTION_USE,((CURRENT_ITEM_SUBMENU_ACTION-$1000000)).w
+                jsr     j_ExecuteMembersListScreenOnMainSummaryPage
                 cmpi.w  #-1,d0
                 bne.w   @CheckPromotableClass
                 txt     137             ; "Oh, I'm wrong.{W2}"

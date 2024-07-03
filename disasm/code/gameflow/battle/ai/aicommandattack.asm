@@ -48,7 +48,7 @@ ExecuteAiCommand_Attack:
                 move.w  #BATTLEACTION_USE_ITEM,(a0)
                 lea     ((ATTACK_COMMAND_ITEM_SLOT-$1000000)).w,a1
                 move.w  (a1),BATTLEACTION_OFFSET_ITEM_SLOT(a0)
-                move.w  d0,BATTLEACTION_OFFSET_ACTOR(a0)
+                move.w  d0,BATTLEACTION_OFFSET_TARGET(a0)
                 move.w  d7,d0           ; d7 --> d0 = character index (aka attacker)
                 move.w  (a1),d1         ; d1 = item slot of the attack item
                 bsr.w   GetItemBySlotAndHeldItemsNumber
@@ -71,7 +71,7 @@ ExecuteAiCommand_Attack:
                 bsr.w   GetSpellRange   
                 bsr.w   PopulateTargetsArrayWithAllCombatants
                 lea     ((CURRENT_BATTLEACTION-$1000000)).w,a0
-                move.w  BATTLEACTION_OFFSET_ACTOR(a0),d0
+                move.w  BATTLEACTION_OFFSET_TARGET(a0),d0
                 jsr     GetCombatantY
                 move.w  d1,d2
                 jsr     GetCombatantX
@@ -93,7 +93,7 @@ ExecuteAiCommand_Attack:
                 move.w  #BATTLEACTION_CAST_SPELL,(a0)
                 lea     ((ATTACK_COMMAND_SPELL-$1000000)).w,a1
                 move.w  (a1),BATTLEACTION_OFFSET_ITEM_OR_SPELL(a0)
-                move.w  d0,BATTLEACTION_OFFSET_ACTOR(a0)
+                move.w  d0,BATTLEACTION_OFFSET_TARGET(a0)
                 lea     ((AI_LAST_TARGET_TABLE-$1000000)).w,a2
                 move.w  d7,d1
                 btst    #COMBATANT_BIT_ENEMY,d1
@@ -141,7 +141,7 @@ ExecuteAiCommand_Attack:
                 clr.l   d3
                 clr.l   d4
                 jsr     GetCombatantType
-                cmpi.b  #ENEMY_KRAKEN_ARM,d1 ; BUGGED When getting Claude's class type, the previous routine 
+                cmpi.b  #ENEMY_KRAKEN_ARM,d1 ; BUG -- When getting Claude's class type, the previous routine 
                                         ;  returns a value in the byte area that happens to be the same
                                         ;  as the Kraken Arm's index, causing the former to perform 
                                         ;  a ranged attack when controlled by the AI.

@@ -675,6 +675,8 @@ DecreaseCurrentAtt:
 
 ; =============== S U B R O U T I N E =======================================
 
+; unused
+
 
 DecreaseBaseDef:
                 
@@ -707,6 +709,8 @@ DecreaseCurrentDef:
 
 ; =============== S U B R O U T I N E =======================================
 
+; unused
+
 
 DecreaseBaseAgi:
                 
@@ -738,6 +742,8 @@ DecreaseCurrentAgi:
 
 
 ; =============== S U B R O U T I N E =======================================
+
+; unused
 
 
 DecreaseBaseMov:
@@ -793,18 +799,15 @@ GetClassName:
 
 ; =============== S U B R O U T I N E =======================================
 
-; In: A0 = address of names list
-;     D1 = name index
-; 
-; Out: A0 = address of entry in names list
-;      D7 = length of name
+; In: a0 = names list pointer, d1.w = name index
+; Out: a0 = pointer to name entry, d7.w = name length
 
 
 FindName:
                 
                 move.w  d0,-(sp)
                 subq.w  #1,d1
-                bmi.s   @Done           ; done if string length = 0
+                bmi.s   @Done           ; done if name index = 0
                 clr.w   d0
 @Loop:
                 
@@ -977,8 +980,8 @@ ApplyStatusEffectsAndItemsOnStats:
 
 ; =============== S U B R O U T I N E =======================================
 
-; In: D0 = combatant index
-;     D3 = status effects bitfield
+; In: d0.w = combatant index
+;     d3.w = status effects bitfield
 
 
 ApplyStatusEffectsOnStats:
@@ -1179,8 +1182,8 @@ equipEffect_IncreaseDoubleAttackProwess:
             if (STANDARD_BUILD&FIX_INCREASE_DOUBLE_RESETS_COUNTER=1)
                 andi.b  #PROWESS_MASK_CRITICAL|PROWESS_MASK_COUNTER,(a2)
             else
-                andi.b  #PROWESS_MASK_CRITICAL,(a2) ; BUGGED chance to counter attack is being set to 1/32
-            endif                   ; setting should be masked as well
+                andi.b  #PROWESS_MASK_CRITICAL,(a2) ; BUG -- chance to counter attack is being set to 1/32
+            endif                       ; counter attack setting should be masked as well
                 or.b    d2,(a2)
                 rts
 
@@ -1994,6 +1997,7 @@ UnequipItemByType:
 
 GetEquippableWeapons:
                 
+                module ; Start of equippable items getter module
                 movem.l d0/d2-d6/a1-a2,-(sp)
                 move.w  #ITEMTYPE_WEAPON,d2
                 bra.s   GetEquippableItemsByType
@@ -2042,18 +2046,11 @@ GetEquippableItemsByType:
             endif
                 lea     ((EQUIPPABLE_ITEMS-$1000000)).w,a2
                 
-                ; Init list with default values
-            if (STANDARD_BUILD&EXPANDED_ITEMS_AND_SPELLS=1)
-                move.l  #$7F0004,(a2)
-                move.l  #$7F0004,4(a2)
-                move.l  #$7F0004,8(a2)
-                move.l  #$1000004,12(a2)
-            else
-                move.l  #$7F0004,(a2)
-                move.l  #$7F0004,4(a2)
-                move.l  #$7F0004,8(a2)
-                move.l  #$800004,12(a2)
-            endif
+                ; Initialize list with default values
+                move.l  #(ITEM_NOTHING<<WORD_SHIFT_COUNT)|4,(a2)
+                move.l  #(ITEM_NOTHING<<WORD_SHIFT_COUNT)|4,4(a2)
+                move.l  #(ITEM_NOTHING<<WORD_SHIFT_COUNT)|4,8(a2)
+                move.l  #(ICON_UNARMED<<WORD_SHIFT_COUNT)|4,12(a2)
                 clr.w   d0
                 moveq   #0,d4
                 moveq   #COMBATANT_ITEMSLOTS_COUNTER,d5
@@ -2085,6 +2082,7 @@ GetEquippableItemsByType:
 
 ; END OF FUNCTION CHUNK FOR GetEquippableWeapons
 
+                modend ; End of equippable items getter module
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -2168,15 +2166,20 @@ IsWeaponOrRingEquippable:
 
 ; =============== S U B R O U T I N E =======================================
 
+; In: d1.w = index of new item being equipped
+; Out: d2.w, d3.w = new ATT and DEF
+
 
 GetEquipNewAttAndDef:
                 
                 movem.l d0/d4-d6/a0,-(sp)
                 bsr.w   GetCombatantEntryAddress
                 clr.w   d2
-                move.b  COMBATANT_OFFSET_ATT_CURRENT(a0),d2 ; current ATT
+                move.b  COMBATANT_OFFSET_ATT_CURRENT(a0),d2
                 clr.w   d3
-                move.b  COMBATANT_OFFSET_DEF_CURRENT(a0),d3 ; current DEF
+                move.b  COMBATANT_OFFSET_DEF_CURRENT(a0),d3 ; default to current ATT and DEF with currently equipped item
+                
+                ; Is new item equippable?
                 movem.w d0/d2-d3,-(sp)
                 move.w  #ITEMTYPE_WEAPON|ITEMTYPE_RING,d2
                 clr.w   d0
@@ -2203,11 +2206,14 @@ GetEquipNewAttAndDef:
             endif
                 movem.w (sp)+,d0/d2-d3
                 bcc.w   @Skip           ; skip if item is not equippable
+                
+                ; Get new item type
                 movem.l d1/a0,-(sp)
                 andi.w  #ITEMENTRY_MASK_INDEX,d1
                 bsr.w   GetItemDefAddress
                 move.b  ITEMDEF_OFFSET_TYPE(a0),d2
                 movem.l (sp)+,d1/a0
+                
                 andi.w  #ITEMTYPE_WEAPON|ITEMTYPE_RING,d2 ; get weapon/ring type
                 bsr.w   GetNewAttAndDefWithItemEquipped
 @Skip:
@@ -2220,32 +2226,28 @@ GetEquipNewAttAndDef:
 
 ; =============== S U B R O U T I N E =======================================
 
-; In: A0 = combatant entry address
-;     D1 = item index
-;     D2 = item type (weapon or ring)
+; In: a0 = combatant entry address
+;     d1.w = new item index
+;     d2.w = new item type (weapon or ring)
 ; 
-; Out: D2 = current ATT with item equipped
-;      D3 = current DEF with item equipped
+; Out: d2.w = current ATT with new item equipped
+;      d3.w = current DEF with new item equipped
 
 
 GetNewAttAndDefWithItemEquipped:
                 
+            if (STANDARD_BUILD=1)
+                include "code\common\stats\getnewattanddefwithitemequipped-standard.asm"
+            else
                 movem.l d0-d1/d4-a0,-(sp)
                 moveq   #COMBATANT_ITEMSLOTS_COUNTER,d7
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                move.l  a0,d4
-            else
                 clr.w   d4
-            endif
 @FindEquippedItem_Loop:
                 
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movep.w COMBATANT_OFFSET_ITEMS(a0),d5
-            else
-                move.w  COMBATANT_OFFSET_ITEMS(a0,d4.w),d5
-            endif
+                move.w  COMBATANT_OFFSET_ITEMS(a0,d4.w),d5 ; find currently equipped item of the same type as the new one
                 btst    #ITEMENTRY_BIT_EQUIPPED,d5
                 beq.s   @Next
+                
                 movem.l d0-d1/a0,-(sp)  ; it's equipped
                 move.w  d5,d1
                 andi.w  #ITEMENTRY_MASK_INDEX,d1
@@ -2253,57 +2255,31 @@ GetNewAttAndDefWithItemEquipped:
                 move.b  ITEMDEF_OFFSET_TYPE(a0),d0
                 and.b   d2,d0
                 movem.l (sp)+,d0-d1/a0
-                bne.w   @GetNewAttAndDef ; is the item type we're looking for
+                bne.w   @GetNewAttAndDef ; is the item type we're looking for, so start with this one
 @Next:
                 
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                addq.w  #ITEMENTRY_SIZE,a0
-            else
                 addq.w  #ITEMENTRY_SIZE,d4
-            endif
                 dbf     d7,@FindEquippedItem_Loop
                 
                 moveq   #COMBATANT_ITEMSLOTS_COUNTER,d7
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movea.l d4,a0
-            else
                 clr.w   d4
-            endif
 @FindFirstUnequippedItem_Loop:
                 
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movep.w COMBATANT_OFFSET_ITEMS(a0),d5
-            else
                 move.w  COMBATANT_OFFSET_ITEMS(a0,d4.w),d5
-            endif
                 btst    #ITEMENTRY_BIT_EQUIPPED,d5
                 beq.w   @GetNewAttAndDef
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                addq.w  #ITEMENTRY_SIZE,a0
-            else
                 addq.w  #ITEMENTRY_SIZE,d4
-            endif
                 dbf     d7,@FindFirstUnequippedItem_Loop
                 
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movea.l d4,a0
-            else
-                clr.w   d4              ; default to item 0
-            endif
+                clr.w   d4              ; default to the first item slot
 @GetNewAttAndDef:
                 
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movep.w COMBATANT_OFFSET_ITEMS(a0),d5
-            else
-                move.w  COMBATANT_OFFSET_ITEMS(a0,d4.w),d5
-            endif
+                move.w  COMBATANT_OFFSET_ITEMS(a0,d4.w),d5 ; d5.w = old equipped item index
+                
+                ; Temporarily equip the new item in place of the old one
                 movem.l d4-d5/a0,-(sp)
                 bset    #ITEMENTRY_BIT_EQUIPPED,d1
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movep.w d1,COMBATANT_OFFSET_ITEMS(a0)
-            else
-                move.w  d1,COMBATANT_OFFSET_ITEMS(a0,d4.w) ; equip item
-            endif
+                move.w  d1,COMBATANT_OFFSET_ITEMS(a0,d4.w)
                 bsr.w   ApplyStatusEffectsAndItemsOnStats
                 clr.w   d2
                 move.b  COMBATANT_OFFSET_ATT_CURRENT(a0),d2
@@ -2312,16 +2288,13 @@ GetNewAttAndDefWithItemEquipped:
                 movem.l (sp)+,d4-d5/a0
                 
                 movem.w d2-d3,-(sp)
-            if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                movep.w d5,COMBATANT_OFFSET_ITEMS(a0)
-            else
-                move.w  d5,COMBATANT_OFFSET_ITEMS(a0,d4.w) ; and unequip
-            endif
+                move.w  d5,COMBATANT_OFFSET_ITEMS(a0,d4.w) ; then re-equip the old one
                 bsr.w   ApplyStatusEffectsAndItemsOnStats
                 movem.w (sp)+,d2-d3
                 
                 movem.l (sp)+,d0-d1/d4-a0
                 rts
+            endif
 
     ; End of function GetNewAttAndDefWithItemEquipped
 
@@ -2793,7 +2766,7 @@ GetCombatantEntryAddress:
                 
                 andi.w  #BYTE_MASK,d0
             if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
-                mulu.w  #COMBATANT_ENTRY_SIZE,d0
+                mulu.w  #COMBATANT_DATA_ENTRY_SIZE,d0
                 lea     (COMBATANT_ENTRIES).l,a0
             else
                 lsl.w   #3,d0           ; multiply by combatant entry size

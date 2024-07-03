@@ -691,14 +691,18 @@ getSavedBattleMapDimensions: macro
 loadSavedMithrilWeaponOrder: macro
             if (STANDARD_BUILD&RELOCATED_SAVED_DATA_TO_SRAM=1)
                 movep.w 0(\2),d0
+                tst.w   d0
                 bne.s   @Next
                 movep.w \1,0(\2)
                 bra.s   @Done
+@Next:          addq.w  #4,a0
             else
                 cmpi.w  #0,(\2)
                 bne.w   @Next           ; check next weapon slot if current one is occupied
                 move.w  \1,(\2)
                 bra.w   @Done           ; move item index to current weapon slot in RAM, and we're done
+@Next:          move.w  #2,d0
+                adda.w  d0,a0
             endif
         endm
     
@@ -860,7 +864,7 @@ defineShorthand: macro Prefix,Shorthand
 tableEnd: macro
             if strcmp('\0','b')
                 dc.b TERMINATOR_BYTE
-                align
+                alignIfStandard
             else
                 dc.w TERMINATOR_WORD
             endif
@@ -978,8 +982,9 @@ position: macro
             endm
     
 facing: macro
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
-                dc.w \1
+            if (STANDARD_BUILD=1)
+                ; make sure that neutral battle entities mapsprite index is word-aligned
+                dc.w \1 ; EXPANDED_MAPSPRITES
             else
                 dc.b \1
             endif
@@ -1252,12 +1257,12 @@ input:      macro
             endm
     
 follower: macro
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
+            if (STANDARD_BUILD=1)
                 dc.b \1
                 dc.b \2
-                dc.w \3
+                dc.w \3 ; word-sized mapsprite index
                 dc.b \4
-                dc.b 0
+                dc.b 0  ; alignment byte
             else
                 dc.b \1
                 dc.b \2
@@ -1267,8 +1272,8 @@ follower: macro
         endm
     
 mapsprite: macro
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
-                defineShorthand.w MAPSPRITE_,\1
+            if (STANDARD_BUILD=1)
+                defineShorthand.w MAPSPRITE_,\1 ; word-sized index to accomodate up to 65k+ mapsprites
             else
                 defineShorthand.b MAPSPRITE_,\1
             endif
@@ -1279,11 +1284,11 @@ portrait:   macro
             endm
     
 speechSfx: macro
-            if (STANDARD_BUILD&EXPANDED_MAPSPRITES=1)
+            if (STANDARD_BUILD=1)
                 defineShorthand.b SFX_,\1
             else
                 defineShorthand.b SFX_,\1
-                dc.b 0
+                dc.b 0  ; alignment byte
             endif
         endm
     

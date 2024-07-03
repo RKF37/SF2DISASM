@@ -15,11 +15,11 @@ j_NumberPrompt:
 ; =============== S U B R O U T I N E =======================================
 
 
-j_DebugFlagSetter:
+j_DebugSetFlag:
                 
-                jmp     DebugFlagSetter(pc)
+                jmp     DebugSetFlag(pc)
 
-    ; End of function j_DebugFlagSetter
+    ; End of function j_DebugSetFlag
 
 
 ; =============== S U B R O U T I N E =======================================
@@ -65,11 +65,11 @@ j_ExecuteWitchMainMenu:
 ; =============== S U B R O U T I N E =======================================
 
 
-j_DisplayNameUnderPortrait:
+j_OpenNameUnderPortraitWindow:
                 
-                jmp     DisplayNameUnderPortrait(pc)
+                jmp     OpenNameUnderPortraitWindow(pc)
 
-    ; End of function j_DisplayNameUnderPortrait
+    ; End of function j_OpenNameUnderPortraitWindow
 
 
 ; =============== S U B R O U T I N E =======================================
